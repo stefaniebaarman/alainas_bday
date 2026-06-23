@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -80,33 +81,53 @@ function completionDocId(teamId: string, challengeId: string): string {
   return `${teamId}_${challengeId}`
 }
 
+function mapCompletionData(
+  id: string,
+  data: Record<string, unknown>,
+): Completion {
+  return {
+    id,
+    teamId: data.teamId as string,
+    challengeId: data.challengeId as string,
+    photoUrl: data.photoUrl as string | undefined,
+    photoPublicId: data.photoPublicId as string | undefined,
+    photoDeleteToken: data.photoDeleteToken as string | undefined,
+    points: data.points as number,
+    completedAt: toDate(data.completedAt as Timestamp | undefined),
+  }
+}
+
+export interface ChallengePhoto {
+  url: string
+  publicId: string
+  deleteToken?: string
+}
+
 export async function completeChallenge(
   teamId: string,
   challengeId: string,
   points: number,
-  photoUrl?: string,
+  photo?: ChallengePhoto,
 ): Promise<Completion> {
   const id = completionDocId(teamId, challengeId)
   const ref = doc(db, COMPLETIONS, id)
   const existing = await getDoc(ref)
 
   if (existing.exists()) {
-    const data = existing.data()
-    return {
-      id,
-      teamId,
-      challengeId,
-      photoUrl: data.photoUrl as string | undefined,
-      points: data.points as number,
-      completedAt: toDate(data.completedAt as Timestamp | undefined),
-    }
+    return mapCompletionData(id, existing.data())
   }
 
   await setDoc(ref, {
     teamId,
     challengeId,
     points,
-    ...(photoUrl ? { photoUrl } : {}),
+    ...(photo
+      ? {
+          photoUrl: photo.url,
+          photoPublicId: photo.publicId,
+          ...(photo.deleteToken ? { photoDeleteToken: photo.deleteToken } : {}),
+        }
+      : {}),
     completedAt: serverTimestamp(),
   })
 
@@ -114,10 +135,20 @@ export async function completeChallenge(
     id,
     teamId,
     challengeId,
-    photoUrl,
+    photoUrl: photo?.url,
+    photoPublicId: photo?.publicId,
+    photoDeleteToken: photo?.deleteToken,
     points,
     completedAt: new Date(),
   }
+}
+
+export async function uncompleteChallenge(
+  teamId: string,
+  challengeId: string,
+): Promise<void> {
+  const id = completionDocId(teamId, challengeId)
+  await deleteDoc(doc(db, COMPLETIONS, id))
 }
 
 export function subscribeToTeamCompletions(
@@ -130,17 +161,9 @@ export function subscribeToTeamCompletions(
   return onSnapshot(
     q,
     (snapshot) => {
-      const completions = snapshot.docs.map((snap) => {
-        const data = snap.data()
-        return {
-          id: snap.id,
-          teamId: data.teamId as string,
-          challengeId: data.challengeId as string,
-          photoUrl: data.photoUrl as string | undefined,
-          points: data.points as number,
-          completedAt: toDate(data.completedAt as Timestamp | undefined),
-        }
-      })
+      const completions = snapshot.docs.map((snap) =>
+        mapCompletionData(snap.id, snap.data()),
+      )
       onUpdate(completions)
     },
     (err) => onError?.(err),

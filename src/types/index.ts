@@ -18,6 +18,8 @@ export interface Completion {
   teamId: string
   challengeId: string
   photoUrl?: string
+  photoPublicId?: string
+  photoDeleteToken?: string
   points: number
   completedAt: Date
 }

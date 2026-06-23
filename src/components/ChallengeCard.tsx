@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import type { Challenge, Completion } from '../types'
-import { uploadPhoto } from '../lib/cloudinary'
-import { completeChallenge } from '../lib/firestore'
+import { deletePhoto, uploadPhoto } from '../lib/cloudinary'
+import { completeChallenge, uncompleteChallenge } from '../lib/firestore'
 
 interface ChallengeCardProps {
   challenge: Challenge
@@ -27,13 +27,40 @@ export function ChallengeCard({ challenge, completion, teamId }: ChallengeCardPr
     setError(null)
 
     try {
-      let photoUrl: string | undefined
+      let photo: { url: string; publicId: string; deleteToken?: string } | undefined
       if (challenge.requiresPhoto && file) {
-        photoUrl = await uploadPhoto(file)
+        const result = await uploadPhoto(file)
+        photo = {
+          url: result.secure_url,
+          publicId: result.public_id,
+          deleteToken: result.delete_token,
+        }
       }
-      await completeChallenge(teamId, challenge.id, challenge.points, photoUrl)
+      await completeChallenge(teamId, challenge.id, challenge.points, photo)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not complete challenge')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  async function handleRemove() {
+    if (!completion) return
+
+    setUploading(true)
+    setError(null)
+
+    try {
+      if (completion.photoDeleteToken) {
+        await deletePhoto(completion.photoDeleteToken)
+      } else if (completion.photoUrl) {
+        throw new Error(
+          'This photo cannot be deleted. Enable "Return delete token" on your Cloudinary upload preset, then upload a new photo.',
+        )
+      }
+      await uncompleteChallenge(teamId, challenge.id)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not remove photo')
     } finally {
       setUploading(false)
     }
@@ -62,19 +89,29 @@ export function ChallengeCard({ challenge, completion, teamId }: ChallengeCardPr
       <p className="challenge-card__desc">{challenge.description}</p>
 
       {completion?.photoUrl && (
-        <a
-          href={completion.photoUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="challenge-card__photo-link"
-        >
-          <img
-            src={completion.photoUrl}
-            alt={`Proof for ${challenge.title}`}
-            className="challenge-card__photo"
-            loading="lazy"
-          />
-        </a>
+        <div className="challenge-card__photo-wrap">
+          <a
+            href={completion.photoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="challenge-card__photo-link"
+          >
+            <img
+              src={completion.photoUrl}
+              alt={`Proof for ${challenge.title}`}
+              className="challenge-card__photo"
+              loading="lazy"
+            />
+          </a>
+          <button
+            type="button"
+            className="btn btn--ghost challenge-card__remove-btn"
+            onClick={() => void handleRemove()}
+            disabled={uploading}
+          >
+            {uploading ? 'Removing…' : 'Remove photo'}
+          </button>
+        </div>
       )}
 
       {error && (
@@ -90,6 +127,7 @@ export function ChallengeCard({ challenge, completion, teamId }: ChallengeCardPr
             type="file"
             accept="image/*"
             capture="environment"
+            multiple={false}
             className="sr-only"
             onChange={onFileChange}
             aria-hidden="true"
@@ -108,6 +146,17 @@ export function ChallengeCard({ challenge, completion, teamId }: ChallengeCardPr
                 : 'Mark Complete'}
           </button>
         </>
+      )}
+
+      {isComplete && !completion?.photoUrl && (
+        <button
+          type="button"
+          className="btn btn--ghost challenge-card__btn"
+          onClick={() => void handleRemove()}
+          disabled={uploading}
+        >
+          {uploading ? 'Undoing…' : 'Undo'}
+        </button>
       )}
     </article>
   )

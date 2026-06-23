@@ -483,9 +483,12 @@ input {
   line-height: 1.55;
 }
 
+.challenge-card__photo-wrap {
+  margin-bottom: 0.75rem;
+}
+
 .challenge-card__photo-link {
   display: block;
-  margin-bottom: 0.75rem;
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
@@ -495,6 +498,13 @@ input {
   max-height: 200px;
   object-fit: cover;
   display: block;
+}
+
+.challenge-card__remove-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+  color: var(--red);
+  font-size: 0.85rem;
 }
 
 .challenge-card__error {
