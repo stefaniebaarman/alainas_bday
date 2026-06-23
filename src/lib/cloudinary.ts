@@ -21,8 +21,20 @@ export async function uploadPhoto(file: File): Promise<string> {
   )
 
   if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Photo upload failed: ${error}`)
+    const body = await response.text()
+    let message = body
+    try {
+      const parsed = JSON.parse(body) as { error?: { message?: string } }
+      message = parsed.error?.message ?? body
+    } catch {
+      // keep raw body
+    }
+    if (/unknown api key/i.test(message)) {
+      throw new Error(
+        'Photo upload failed: invalid Cloudinary cloud name. In the Cloudinary dashboard, copy Cloud name (not API key) into VITE_CLOUDINARY_CLOUD_NAME, then restart the dev server or redeploy.',
+      )
+    }
+    throw new Error(`Photo upload failed: ${message}`)
   }
 
   const data = (await response.json()) as CloudinaryUploadResult
