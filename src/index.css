@@ -2,11 +2,13 @@
   --pink: #e91e8c;
   --pink-dark: #c41e5a;
   --red: #d62839;
+  --red-deep: #b91c1c;
+  --red-soft: #a83232;
   --gold: #f4b942;
   --gold-light: #ffe08a;
   --cream: #fff8f3;
-  --ink: #1a0f14;
-  --ink-soft: #4a3540;
+  --ink: #b91c1c;
+  --ink-soft: #a83232;
   --surface: #ffffff;
   --surface-2: #fff0f5;
   --border: rgba(196, 30, 90, 0.15);
@@ -37,8 +39,8 @@ body {
   color: var(--ink);
   background:
     radial-gradient(ellipse 120% 80% at 50% -20%, rgba(244, 185, 66, 0.25), transparent),
-    radial-gradient(ellipse 80% 50% at 100% 50%, rgba(233, 30, 140, 0.08), transparent),
-    linear-gradient(180deg, var(--cream) 0%, #fff5f8 100%);
+    radial-gradient(ellipse 80% 50% at 100% 50%, rgba(185, 28, 28, 0.08), transparent),
+    linear-gradient(180deg, var(--cream) 0%, #fff5f5 100%);
   background-attachment: fixed;
 }
 
