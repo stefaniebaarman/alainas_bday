@@ -38,17 +38,28 @@ export function ChallengesPage() {
 
   const completionMap = new Map(completions.map((c) => [c.challengeId, c]))
   const teamPoints = completions.reduce((sum, c) => sum + c.points, 0)
+  const progress = Math.round((completions.length / challenges.length) * 100)
 
   return (
     <Layout>
       <div className="page-header">
         <p className="eyebrow">{teamName}</p>
-        <h1>Your Challenges</h1>
+        <h1>Your Hunt 🎯</h1>
         <div className="score-pill">
           <span className="score-pill__value">{teamPoints}</span>
           <span className="score-pill__label">
             / {totalPossiblePoints} pts · {completions.length}/{challenges.length} done
           </span>
+        </div>
+      </div>
+
+      <div className="progress-block">
+        <div className="progress-block__labels">
+          <span>Hunt progress</span>
+          <span>{progress}%</span>
+        </div>
+        <div className="progress-bar" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
+          <div className="progress-bar__fill" style={{ width: `${progress}%` }} />
         </div>
       </div>
 
@@ -62,12 +73,13 @@ export function ChallengesPage() {
         <p className="loading-text">Loading challenges…</p>
       ) : (
         <div className="challenge-list">
-          {challenges.map((challenge) => (
+          {challenges.map((challenge, index) => (
             <ChallengeCard
               key={challenge.id}
               challenge={challenge}
               completion={completionMap.get(challenge.id)}
               teamId={teamId}
+              index={index}
             />
           ))}
         </div>

@@ -4,6 +4,7 @@ export interface Challenge {
   description: string
   points: number
   requiresPhoto: boolean
+  icon: string
 }
 
 export interface Team {
@@ -28,4 +29,16 @@ export interface LeaderboardEntry {
   teamName: string
   totalPoints: number
   completedCount: number
+}
+
+export interface GalleryPhoto {
+  id: string
+  teamId: string
+  teamName: string
+  challengeId: string
+  challengeTitle: string
+  challengeIcon: string
+  photoUrl: string
+  points: number
+  completedAt: Date
 }

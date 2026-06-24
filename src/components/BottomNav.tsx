@@ -7,6 +7,7 @@ export function BottomNav() {
 
   const links = [
     { to: '/challenges', label: 'Hunt', icon: '🎯' },
+    { to: '/gallery', label: 'Wall', icon: '📸' },
     { to: '/leaderboard', label: 'Scores', icon: '🏆' },
     { to: '/team', label: teamName ? 'Team' : 'Join', icon: '👯' },
   ]

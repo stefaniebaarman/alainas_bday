@@ -7,6 +7,9 @@ export function LandingPage() {
   return (
     <Layout showNav={false} className="landing">
       <div className="landing__content">
+        <div className="landing__hero-icon" aria-hidden="true">
+          🎂
+        </div>
         <p className="eyebrow">The Bullpen · Washington, DC</p>
         <h1 className="landing__title">
           Alaina&apos;s
@@ -15,12 +18,12 @@ export function LandingPage() {
         <p className="landing__tagline">
           Teams. Chaos. Points. Glory.
           <br />
-          Complete bar challenges, upload proof, and climb the leaderboard tonight.
+          Snap wild photos, stalk the proof wall, and fight for #1 tonight.
         </p>
 
         <div className="landing__badges">
-          <span className="pill">🍹 Bar vibes</span>
-          <span className="pill">📸 Photo proof</span>
+          <span className="pill">🎯 13 challenges</span>
+          <span className="pill">📸 Proof wall</span>
           <span className="pill">🏆 Live scores</span>
         </div>
 
@@ -29,13 +32,11 @@ export function LandingPage() {
           className="btn btn--primary btn--xl landing__cta"
           onClick={() => navigate('/team')}
         >
-          Join the Hunt
+          Let&apos;s Go 🚀
         </button>
 
-        <p className="landing__hint">No account needed — just pick a team name and go.</p>
+        <p className="landing__hint">No account needed — just pick a team name and hunt.</p>
       </div>
-
-      <div className="confetti-strip" aria-hidden="true" />
     </Layout>
   )
 }

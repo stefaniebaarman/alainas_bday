@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, type CSSProperties } from 'react'
 import type { Challenge, Completion } from '../types'
 import { deletePhoto, uploadPhoto } from '../lib/photoStorage'
 import { completeChallenge, uncompleteChallenge } from '../lib/firestore'
@@ -7,9 +7,10 @@ interface ChallengeCardProps {
   challenge: Challenge
   completion?: Completion
   teamId: string
+  index?: number
 }
 
-export function ChallengeCard({ challenge, completion, teamId }: ChallengeCardProps) {
+export function ChallengeCard({ challenge, completion, teamId, index = 0 }: ChallengeCardProps) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -64,15 +65,21 @@ export function ChallengeCard({ challenge, completion, teamId }: ChallengeCardPr
   }
 
   return (
-    <article className={`challenge-card ${isComplete ? 'challenge-card--complete' : ''}`}>
+    <article
+      className={`challenge-card ${isComplete ? 'challenge-card--complete' : ''}`}
+      style={{ '--delay': `${index * 0.04}s` } as CSSProperties}
+    >
       <div className="challenge-card__header">
-        <div>
+        <span className="challenge-card__icon" aria-hidden="true">
+          {challenge.icon}
+        </span>
+        <div className="challenge-card__head-text">
           <h2 className="challenge-card__title">{challenge.title}</h2>
-          <p className="challenge-card__points">{challenge.points} pts</p>
+          <p className="challenge-card__points">+{challenge.points} pts</p>
         </div>
         {isComplete && (
           <span className="challenge-card__badge" aria-label="Completed">
-            ✓ Done
+            ✓
           </span>
         )}
       </div>
@@ -133,7 +140,7 @@ export function ChallengeCard({ challenge, completion, teamId }: ChallengeCardPr
             {uploading
               ? 'Uploading…'
               : challenge.requiresPhoto
-                ? '📸 Snap & Complete'
+                ? '📸 Snap It!'
                 : 'Mark Complete'}
           </button>
         </>
