@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import type { Challenge, Completion } from '../types'
-import { deletePhoto, uploadPhoto } from '../lib/cloudinary'
+import { deletePhoto, uploadPhoto } from '../lib/photoStorage'
 import { completeChallenge, uncompleteChallenge } from '../lib/firestore'
 
 interface ChallengeCardProps {
@@ -27,14 +27,9 @@ export function ChallengeCard({ challenge, completion, teamId }: ChallengeCardPr
     setError(null)
 
     try {
-      let photo: { url: string; publicId: string; deleteToken?: string } | undefined
+      let photo: { url: string; storagePath: string } | undefined
       if (challenge.requiresPhoto && file) {
-        const result = await uploadPhoto(file)
-        photo = {
-          url: result.secure_url,
-          publicId: result.public_id,
-          deleteToken: result.delete_token,
-        }
+        photo = await uploadPhoto(teamId, challenge.id, file)
       }
       await completeChallenge(teamId, challenge.id, challenge.points, photo)
     } catch (err) {
@@ -51,12 +46,8 @@ export function ChallengeCard({ challenge, completion, teamId }: ChallengeCardPr
     setError(null)
 
     try {
-      if (completion.photoDeleteToken) {
-        await deletePhoto(completion.photoDeleteToken)
-      } else if (completion.photoUrl) {
-        throw new Error(
-          'This photo cannot be deleted. Enable "Return delete token" on your Cloudinary upload preset, then upload a new photo.',
-        )
+      if (completion.photoStoragePath) {
+        await deletePhoto(completion.photoStoragePath)
       }
       await uncompleteChallenge(teamId, challenge.id)
     } catch (err) {

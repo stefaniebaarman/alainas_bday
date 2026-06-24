@@ -7,7 +7,7 @@ A mobile-first scavenger hunt web app for Alaina's birthday at **The Bullpen** i
 - React + Vite + TypeScript
 - Firebase Firestore (teams, completions, leaderboard)
 - Firebase Anonymous Auth (background only — no user accounts)
-- Cloudinary unsigned uploads for photo proof
+- Firebase Storage (photo proof uploads and deletes)
 - GitHub Pages deployment
 
 ## Quick start
@@ -29,8 +29,6 @@ cp .env.example .env
 | Variable | Where to get it |
 |----------|-----------------|
 | `VITE_FIREBASE_*` | [Firebase Console](https://console.firebase.google.com) → Project settings → Your apps → Web app config |
-| `VITE_CLOUDINARY_CLOUD_NAME` | [Cloudinary Dashboard](https://cloudinary.com/console) |
-| `VITE_CLOUDINARY_UPLOAD_PRESET` | Cloudinary → Settings → Upload → Upload presets (create an **unsigned** preset) |
 
 ### 3. Firebase setup
 
@@ -53,22 +51,32 @@ service cloud.firestore {
       allow read: if true;
       allow create: if request.auth != null
         && !exists(/databases/$(database)/documents/completions/$(completionId));
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if request.auth != null;
     }
   }
 }
 ```
 
-6. Create composite indexes if prompted by Firebase when you first run the app (single-field indexes are usually auto-created).
+6. Enable **Storage** → Get started (use the default bucket).
+7. Deploy Storage rules (Firebase Console → Storage → Rules), or run `firebase deploy --only storage`:
 
-### 4. Cloudinary setup
+```
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /photos/{teamId}/{fileName} {
+      allow read: if true;
+      allow create, delete: if request.auth != null;
+      allow update: if false;
+    }
+  }
+}
+```
 
-1. Create a free Cloudinary account.
-2. Go to **Settings → Upload → Upload presets**.
-3. Add preset → set **Signing Mode** to **Unsigned**.
-4. Copy the preset name to `VITE_CLOUDINARY_UPLOAD_PRESET`.
+8. Create composite indexes if prompted by Firebase when you first run the app (single-field indexes are usually auto-created).
 
-### 5. Run locally
+### 4. Run locally
 
 ```bash
 npm run dev
@@ -132,7 +140,7 @@ src/
 ├── lib/
 │   ├── firebase.ts       # Firebase init
 │   ├── firestore.ts      # Teams, completions, leaderboard
-│   ├── cloudinary.ts     # Photo uploads
+│   ├── photoStorage.ts   # Photo uploads and deletes
 │   └── storage.ts        # localStorage helpers
 ├── pages/                # Route pages
 ├── components/           # UI components
@@ -141,8 +149,9 @@ src/
 
 ## Notes
 
-- No Firebase Storage, backend server, or paid hosting required.
-- Photo uploads go directly from the browser to Cloudinary.
+- No backend server or paid hosting required.
+- Photo uploads go directly from the browser to Firebase Storage.
+- Removing a photo deletes it from Storage and marks the challenge incomplete again.
 - Completion documents use IDs `{teamId}_{challengeId}` to prevent duplicate submissions.
 
 Happy birthday, Alaina! 🎂

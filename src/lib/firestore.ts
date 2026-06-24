@@ -90,8 +90,7 @@ function mapCompletionData(
     teamId: data.teamId as string,
     challengeId: data.challengeId as string,
     photoUrl: data.photoUrl as string | undefined,
-    photoPublicId: data.photoPublicId as string | undefined,
-    photoDeleteToken: data.photoDeleteToken as string | undefined,
+    photoStoragePath: data.photoStoragePath as string | undefined,
     points: data.points as number,
     completedAt: toDate(data.completedAt as Timestamp | undefined),
   }
@@ -99,8 +98,7 @@ function mapCompletionData(
 
 export interface ChallengePhoto {
   url: string
-  publicId: string
-  deleteToken?: string
+  storagePath: string
 }
 
 export async function completeChallenge(
@@ -124,8 +122,7 @@ export async function completeChallenge(
     ...(photo
       ? {
           photoUrl: photo.url,
-          photoPublicId: photo.publicId,
-          ...(photo.deleteToken ? { photoDeleteToken: photo.deleteToken } : {}),
+          photoStoragePath: photo.storagePath,
         }
       : {}),
     completedAt: serverTimestamp(),
@@ -136,8 +133,7 @@ export async function completeChallenge(
     teamId,
     challengeId,
     photoUrl: photo?.url,
-    photoPublicId: photo?.publicId,
-    photoDeleteToken: photo?.deleteToken,
+    photoStoragePath: photo?.storagePath,
     points,
     completedAt: new Date(),
   }
