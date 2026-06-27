@@ -45,7 +45,7 @@ service cloud.firestore {
     match /teams/{teamId} {
       allow read: if true;
       allow create: if request.auth != null;
-      allow update, delete: if false;
+      allow update, delete: if request.auth != null;
     }
     match /completions/{completionId} {
       allow read: if true;

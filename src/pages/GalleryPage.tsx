@@ -46,7 +46,6 @@ export function GalleryPage() {
       <div className="page-header">
         <p className="eyebrow">Live feed</p>
         <h1>The Proof Wall 📸</h1>
-        <p>Every team&apos;s wildest moments from tonight — scroll, spy, celebrate.</p>
       </div>
 
       {error && (

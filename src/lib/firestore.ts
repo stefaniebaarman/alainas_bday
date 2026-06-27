@@ -8,9 +8,12 @@ import {
   query,
   serverTimestamp,
   setDoc,
+  updateDoc,
   where,
+  writeBatch,
   type Timestamp,
 } from 'firebase/firestore'
+import { deletePhoto } from './photoStorage'
 import { db } from './firebase'
 import type { Completion, Team } from '../types'
 
@@ -75,6 +78,64 @@ export async function getTeam(teamId: string): Promise<Team | null> {
     normalizedName: data.normalizedName as string,
     createdAt: toDate(data.createdAt as Timestamp | undefined),
   }
+}
+
+export async function renameTeam(teamId: string, newDisplayName: string): Promise<Team> {
+  const trimmed = newDisplayName.trim()
+  if (!trimmed) {
+    throw new Error('Team name cannot be empty.')
+  }
+
+  const normalizedName = normalizeTeamName(trimmed)
+  const conflict = await getDocs(
+    query(collection(db, TEAMS), where('normalizedName', '==', normalizedName)),
+  )
+
+  if (!conflict.empty && conflict.docs[0].id !== teamId) {
+    throw new Error('Another team is already using that name.')
+  }
+
+  const teamRef = doc(db, TEAMS, teamId)
+  const existing = await getDoc(teamRef)
+  if (!existing.exists()) {
+    throw new Error('Team not found.')
+  }
+
+  await updateDoc(teamRef, { name: trimmed, normalizedName })
+
+  return {
+    id: teamId,
+    name: trimmed,
+    normalizedName,
+    createdAt: toDate(existing.data().createdAt as Timestamp | undefined),
+  }
+}
+
+export async function deleteTeam(teamId: string): Promise<void> {
+  const completionsSnap = await getDocs(
+    query(collection(db, COMPLETIONS), where('teamId', '==', teamId)),
+  )
+
+  const photoPaths = completionsSnap.docs
+    .map((snap) => snap.data().photoStoragePath as string | undefined)
+    .filter((path): path is string => Boolean(path))
+
+  await Promise.all(
+    photoPaths.map(async (path) => {
+      try {
+        await deletePhoto(path)
+      } catch {
+        // Photo may already be gone — keep deleting the rest.
+      }
+    }),
+  )
+
+  const batch = writeBatch(db)
+  for (const snap of completionsSnap.docs) {
+    batch.delete(snap.ref)
+  }
+  batch.delete(doc(db, TEAMS, teamId))
+  await batch.commit()
 }
 
 function completionDocId(teamId: string, challengeId: string): string {

@@ -368,6 +368,17 @@ input {
   width: 100%;
 }
 
+.btn--danger {
+  background: rgba(255, 77, 109, 0.15);
+  color: #ffb3c1;
+  border: 2px solid rgba(255, 77, 109, 0.5);
+  width: 100%;
+}
+
+.btn--danger:active:not(:disabled) {
+  background: rgba(255, 77, 109, 0.3);
+}
+
 .btn--lg {
   min-height: 52px;
   padding: 0.85rem 1.5rem;
@@ -437,6 +448,47 @@ input {
   font-size: 1.6rem;
   font-weight: 600;
   color: var(--neon-gold);
+}
+
+.team-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
+.team-settings .btn--ghost {
+  margin-top: 0;
+}
+
+.team-rename-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.team-delete-confirm {
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 77, 109, 0.4);
+  background: rgba(255, 77, 109, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.team-delete-confirm p {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.team-delete-confirm strong {
+  color: var(--ink);
+}
+
+.team-delete-confirm .btn--ghost {
+  margin-top: 0;
 }
 
 /* Alerts */
@@ -856,75 +908,6 @@ input {
   font-size: 0.75rem;
   color: var(--neon-gold);
   margin-top: 0.15rem;
-}
-
-/* Podium */
-
-.podium {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  padding: 0 0.25rem;
-}
-
-.podium__slot {
-  flex: 1;
-  max-width: 110px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.25rem;
-}
-
-.podium__slot--empty {
-  visibility: hidden;
-}
-
-.podium__medal {
-  font-size: 1.5rem;
-}
-
-.podium__name {
-  font-family: var(--font-display);
-  font-size: 0.78rem;
-  font-weight: 600;
-  line-height: 1.2;
-  word-break: break-word;
-}
-
-.podium__pts {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--neon-gold);
-}
-
-.podium__bar {
-  width: 100%;
-  border-radius: 8px 8px 0 0;
-  background: linear-gradient(180deg, var(--neon-pink), #c026d3);
-  margin-top: 0.35rem;
-}
-
-.podium__slot--1 .podium__bar {
-  height: 72px;
-  box-shadow: var(--glow-pink);
-}
-
-.podium__slot--2 .podium__bar {
-  height: 52px;
-  opacity: 0.85;
-}
-
-.podium__slot--3 .podium__bar {
-  height: 38px;
-  opacity: 0.7;
-}
-
-.podium__slot--me .podium__name {
-  color: var(--neon-gold);
 }
 
 /* Leaderboard */
