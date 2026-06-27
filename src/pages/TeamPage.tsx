@@ -245,7 +245,7 @@ export function TeamPage() {
           id="team-name"
           type="text"
           className="input input--lg"
-          placeholder="e.g. Birthday Bashers"
+          placeholder=""
           value={teamName}
           onChange={(e) => setTeamName(e.target.value)}
           maxLength={40}
